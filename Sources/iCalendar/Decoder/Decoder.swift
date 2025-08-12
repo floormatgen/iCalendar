@@ -30,7 +30,7 @@ open class Decoder: @unchecked Sendable {
     }
 
     public func decodeCalendar(from string: String) throws -> iCal.Calendar {
-        fatalError()
+        return _read { preconditionFailure("Not Implemented!") }
     }
 
     public func decodeCalendars(from data: Data) throws -> [iCal.Calendar] {
@@ -38,7 +38,7 @@ open class Decoder: @unchecked Sendable {
     }
 
     public func decodeCalendars(from string: String) throws -> [iCal.Calendar] {
-        fatalError()
+        return _read { preconditionFailure("Not Implemented!") }
     }
 
 }
