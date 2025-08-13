@@ -1,7 +1,8 @@
 extension iCal {
 
-public protocol DataType: Sendable, Equatable, Hashable, LosslessStringConvertible {
-    init?(_ string: some StringProtocol)
+//? Not all DataTypes can be LosslessStringConvertible, as some require paramater arguments as well.
+public protocol DataType: Sendable, Equatable, Hashable {
+    
 }
 
 } // extension iCal

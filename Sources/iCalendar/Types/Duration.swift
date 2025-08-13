@@ -70,7 +70,7 @@ public struct Duration: DataType {
 
 } // extension iCal
 
-extension iCal.Duration {
+extension iCal.Duration: LosslessStringConvertible {
     
     /// Creates an empty ``ICDuration``.
     ///

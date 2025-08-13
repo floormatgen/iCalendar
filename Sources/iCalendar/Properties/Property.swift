@@ -34,8 +34,8 @@ public struct Property<Value: iCal.DataType>: Sendable where Value: Sendable {
         
     }
 
-    public init?(of type: Value.Type = Value.self, from components: iCal.PropertyComponents) {
-        guard let value = Value(components.value) else { return nil }
+    public init?(of type: Value.Type = Value.self, from components: iCal.PropertyComponents) where Value: LosslessStringConvertible {
+        guard let value = Value(String(components.value)) else { return nil }
 
         var params: [String : String] = [:]
         for param in components.params {

@@ -13,7 +13,7 @@ public enum DateTime: DataType {
     
     public func dateComponents(with zone: TimeZone = .current, calendar: Foundation.Calendar = .current) -> DateComponents {
         switch self {
-            case .localTime(let components):
+        case .localTime(let components):
             return components
         case .localTimeWithTimeZone(_, let components):
             return components
@@ -26,13 +26,13 @@ public enum DateTime: DataType {
 
 } // extension iCal
 
-public extension iCal.DateTime {
+extension iCal.DateTime: LosslessStringConvertible {
 
-    var description: String {
+    public var description: String {
         return ""
     }
 
-    init(_ string: some StringProtocol) {
+    public init(_ string: some StringProtocol) {
         fatalError()
     }
 
