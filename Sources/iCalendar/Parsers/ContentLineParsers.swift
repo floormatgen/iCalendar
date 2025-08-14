@@ -44,8 +44,8 @@ static var iana_token: some Parser<Substring, Substring> {
     Parse {
         Many(1) {
             OneOf {
-                CharSet.ALPHA
-                CharSet.DIGIT
+                lineFoldCompliantParser(from: CharSet.ALPHA)
+                lineFoldCompliantParser(from: CharSet.DIGIT)
                 "-" .map { "-" }
             }
         } .map { $0.reduce("" as Substring) { $0 + $1 } }
@@ -66,12 +66,13 @@ static var x_name: some Parser<Substring, Substring> {
         }
         Many(1) {
             OneOf {
-                CharSet.ALPHA
-                CharSet.DIGIT
+                lineFoldCompliantParser(from: CharSet.ALPHA)
+                lineFoldCompliantParser(from: CharSet.DIGIT)
             }
         } .map { $0.reduce("") { $0 + $1 } }
     } .map { $0 + $1 + $2 }
 }
+
 /// vendorid      = 3*(ALPHA / DIGIT)
 /// ; Vendor identification
 static var vendorid: some Parser<Substring, Substring> {
@@ -98,12 +99,7 @@ static var param: some Parser<Substring, ParameterComponents> {
             ","
             param_value
         }
-    } .map {
-        let name = $0.0
-        let value1 = $0.1
-        let otherValues = $0.2
-        return ParameterComponents(parameterName: name, values: [value1] + otherValues)
-    }
+    } .map { ParameterComponents(parameterName: $0.0, values: [$0.1] + $0.2) }
 }
 
 /// param-name    = iana-token / x-name
@@ -129,14 +125,14 @@ static var param_value: some Parser<Substring, Substring> {
 /// paramtext     = *SAFE-CHAR
 static var paramtext: some Parser<Substring, Substring> {
     Parse {
-        CharSet.SAFE_CHAR
+        lineFoldCompliantParser(from: CharSet.SAFE_CHAR)
     }
 } 
 
 /// value         = *VALUE-CHAR
 static var value: some Parser<Substring, Substring> {
     Parse {
-        CharSet.VALUE_CHAR
+        lineFoldCompliantParser(from: CharSet.VALUE_CHAR)
     }
 }
 
@@ -152,20 +148,16 @@ static var quoted_string: some Parser<Substring, Substring> {
 /// The line fold format
 static var line_fold: some Parser<Substring, Void> { 
     Parse {
-        Skip { " \r\n" }
+        "\r\n "
     }
 }
 
 /// Create a parser that takes into account content lines from a `CharacterSet`
 static func lineFoldCompliantParser(from characterSet: CharacterSet) -> some Parser<Substring, Substring> {
-    var characterSet = characterSet
-    characterSet.remove(Unicode.Scalar(0x20)) // The space is removed, as that is where a line fold can start
     return Many {
-        OneOf {
-            line_fold .map { "" as Substring }
-            characterSet
-            " " .map { " " }
-        }
+        characterSet
+    } separator: {
+        line_fold
     } .map { $0.reduce("") { $0 + $1 } }
 }
 

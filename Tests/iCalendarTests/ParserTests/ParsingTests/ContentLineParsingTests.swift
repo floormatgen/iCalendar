@@ -41,6 +41,15 @@ struct ContentLineParsingTests {
         let result = try iCal.Parser.param_value.parse(input)
         #expect(result == expected, "param_value failed to extract value [input: \(input), result: \(result), expected: \(expected)]")
     }
+    
+    @Test("param_value can unfold content lines", arguments: [
+        ("hello \r\n world", "hello world"),
+        ("\"hello \r\n world\"", "hello world"),
+    ])
+    func param_value_correctlyUnfolds(input: String, expected: String) throws {
+        let result = try iCal.Parser.param_value.parse(input)
+        #expect(result == expected, "param_value failed to unfold conent line [input: \(input), result: \(result), expected: \(expected)]")
+    }
 
     // MARK: - quoted_string Tests
 
@@ -52,6 +61,15 @@ struct ContentLineParsingTests {
     func test_quoted_string_extractsInnerString(input: String, expected: String) throws {
         let result = try iCal.Parser.quoted_string.parse(input)
         #expect(result == expected, "Input string not properly stripped of DQUOTE [input: \(input), result: \(result), expected:\(expected)]")
+    }
+    
+    @Test("quoted_string can unfold content lines", arguments: [
+        ("\"hello \r\n world\"", "hello world"),
+        ("\"str\r\n ing\"", "string"),
+    ])
+    func quoted_string_correctlyUnfolds(input: String, expected: String) throws {
+        let result = try iCal.Parser.quoted_string.parse(input)
+        #expect(result == expected, "quoted_string failed to unfold content line [input: \(input), result: \(result), expected: \(expected)]")
     }
 
 }

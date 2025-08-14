@@ -40,6 +40,7 @@ open class Decoder: @unchecked Sendable {
     }
     
     // MARK: -- Syncronization --
+    // Could make these public 'private' methods...
     
     /// Internal queue for syncronization.
     final internal let _queue = DispatchQueue(label: "iCal.Decoder", attributes: .concurrent)
