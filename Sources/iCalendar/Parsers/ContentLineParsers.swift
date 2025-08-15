@@ -4,7 +4,6 @@ import Foundation
 
 extension iCal.Parser {
 
-//? Will unfold lines before using this parser, probably not optimal but content lines are really annoying...
 /// contentline   = name *(";" param ) ":" value CRLF
 /// ; This ABNF is just a general definition for an initial parsing
 /// ; of the content line into its property name, parameter list,
@@ -16,7 +15,7 @@ extension iCal.Parser {
 /// ; longer than 75 octets SHOULD be folded according to
 /// ; the folding procedure described above.
 static var contentline: some Parser<Substring, ContentLineComponents> {
-    Parse {
+    Parse(ContentLineComponents.init) {
         name
         Many {
             ";"
@@ -25,7 +24,7 @@ static var contentline: some Parser<Substring, ContentLineComponents> {
         ":"
         value
         "\r\n"
-    } .map(ContentLineComponents.init)
+    }
 }
 
 /// name          = iana-token / x-name
@@ -79,8 +78,8 @@ static var vendorid: some Parser<Substring, Substring> {
     Parse {
         Many(3) {
             OneOf {
-                CharSet.ALPHA
-                CharSet.DIGIT
+                lineFoldCompliantParser(from: CharSet.ALPHA)
+                lineFoldCompliantParser(from: CharSet.DIGIT)
             }
         }
     } .map { $0.reduce("" as Substring) { $0 + $1 } }
@@ -163,14 +162,14 @@ static func lineFoldCompliantParser(from characterSet: CharacterSet) -> some Par
 
 // MARK: - Component Types
 
-internal struct ParameterComponents {
+internal struct ParameterComponents: Equatable, Hashable {
     var parameterName: Substring
     var values: [Substring]
 }
 
-internal struct ContentLineComponents {
+internal struct ContentLineComponents: Equatable, Hashable {
     var name: Substring
-    var parameters: [ParameterComponents]?
+    var parameters: [ParameterComponents] = []
     var value: Substring
 }
 

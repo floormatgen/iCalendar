@@ -10,15 +10,21 @@ open class Decoder: @unchecked Sendable {
 
     }
     
-    // MARK: - Properties
+    // MARK: - Configurable Properties
 
     private var _supportedComponents: [any iCal.Component.Type] = [ iCal.Calendar.self, iCal.Event.self ]
+    private var _supportedProperties: [any iCal.PropertyParameter.Type] = [ iCal.AlternateTextRepresentation.self ]
 
     // MARK: - Accessors
 
     open var supportedComponents: [any iCal.Component.Type] {
         get { _read { _supportedComponents } }
-        set { _write { _supportedComponents = newValue } }
+        set { _modify { _supportedComponents = newValue } }
+    }
+
+    open var supportedProperties: [any iCal.PropertyParameter.Type] {
+        get { _read { _supportedProperties } }
+        set { _modify { _supportedProperties = newValue } }
     }
     
     // MARK: - Calendar Decoding
@@ -39,7 +45,7 @@ open class Decoder: @unchecked Sendable {
         return _read { preconditionFailure("Not Implemented!") }
     }
     
-    // MARK: -- Syncronization --
+    // MARK: - Syncronization
     // Could make these public 'private' methods...
     
     /// Internal queue for syncronization.
@@ -54,6 +60,19 @@ open class Decoder: @unchecked Sendable {
     final internal func _write<R>(operation: () throws -> R) rethrows -> R {
         return try _queue.sync(flags: .barrier, execute: operation)
     }
+
+    /// Thread-safe write to configurable properties
+    final internal func _modify<R>(operation: () throws -> R) rethrows -> R {
+        return try _write {
+            _ready = false
+            return try operation()
+        }
+    }
+
+    // MARK: - Optimisations
+
+    /// Whether the 
+    private var _ready = false
 
 }
 
